@@ -202,8 +202,7 @@ fn jump_to_location(
     offset_encoding: OffsetEncoding,
     action: Action,
 ) {
-    let (view, doc) = current!(editor);
-    push_jump(view, doc);
+    push_jump(editor);
 
     let path = match location.uri.to_file_path() {
         Ok(path) => path,
@@ -244,8 +243,7 @@ fn sym_picker(symbols: Vec<SymbolInformationItem>, current_path: Option<lsp::Url
         symbols,
         current_path.clone(),
         move |cx, item, action| {
-            let (view, doc) = current!(cx.editor);
-            push_jump(view, doc);
+            push_jump(cx.editor);
 
             if current_path.as_ref() != Some(&item.symbol.location.uri) {
                 let uri = &item.symbol.location.uri;
@@ -329,8 +327,7 @@ fn diag_picker(
               },
               action| {
             if current_path.as_ref() == Some(url) {
-                let (view, doc) = current!(cx.editor);
-                push_jump(view, doc);
+                push_jump(cx.editor);
             } else {
                 let path = url.to_file_path().unwrap();
                 cx.editor.open(&path, action).expect("editor.open failed");

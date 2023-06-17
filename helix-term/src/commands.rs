@@ -1115,18 +1115,19 @@ fn goto_file_start(cx: &mut Context) {
     if cx.count.is_some() {
         goto_line(cx);
     } else {
+        push_jump(cx.editor);
         let (view, doc) = current!(cx.editor);
         let text = doc.text().slice(..);
         let selection = doc
             .selection(view.id)
             .clone()
             .transform(|range| range.put_cursor(text, 0, cx.editor.mode == Mode::Select));
-        push_jump(view, doc);
         doc.set_selection(view.id, selection);
     }
 }
 
 fn goto_file_end(cx: &mut Context) {
+    push_jump(cx.editor);
     let (view, doc) = current!(cx.editor);
     let text = doc.text().slice(..);
     let pos = doc.text().len_chars();
@@ -1134,7 +1135,6 @@ fn goto_file_end(cx: &mut Context) {
         .selection(view.id)
         .clone()
         .transform(|range| range.put_cursor(text, pos, cx.editor.mode == Mode::Select));
-    push_jump(view, doc);
     doc.set_selection(view.id, selection);
 }
 
@@ -2996,15 +2996,15 @@ fn normal_mode(cx: &mut Context) {
 }
 
 // Store a jump on the jumplist.
-fn push_jump(view: &mut View, doc: &Document) {
+fn push_jump(editor: &mut Editor) {
+    let (view, doc) = current!(editor);
     let jump = (doc.id(), doc.selection(view.id).clone());
     view.jumps.push(jump);
 }
 
 fn goto_line(cx: &mut Context) {
     if cx.count.is_some() {
-        let (view, doc) = current!(cx.editor);
-        push_jump(view, doc);
+        push_jump(cx.editor);
 
         goto_line_without_jumplist(cx.editor, cx.count);
     }
@@ -3032,6 +3032,7 @@ fn goto_line_without_jumplist(editor: &mut Editor, count: Option<NonZeroUsize>) 
 }
 
 fn goto_last_line(cx: &mut Context) {
+    push_jump(cx.editor);
     let (view, doc) = current!(cx.editor);
     let text = doc.text().slice(..);
     let line_idx = if text.line(text.len_lines() - 1).len_chars() == 0 {
@@ -3046,7 +3047,6 @@ fn goto_last_line(cx: &mut Context) {
         .clone()
         .transform(|range| range.put_cursor(text, pos, cx.editor.mode == Mode::Select));
 
-    push_jump(view, doc);
     doc.set_selection(view.id, selection);
 }
 
@@ -4710,8 +4710,7 @@ fn jump_backward(cx: &mut Context) {
 }
 
 fn save_selection(cx: &mut Context) {
-    let (view, doc) = current!(cx.editor);
-    push_jump(view, doc);
+    push_jump(cx.editor);
     cx.editor.set_status("Selection saved to jumplist");
 }
 
