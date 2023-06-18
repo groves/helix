@@ -4693,11 +4693,25 @@ fn match_brackets(cx: &mut Context) {
 
 fn jump_forward(cx: &mut Context) {
     let count = cx.count();
-    let config = cx.editor.config();
-    let view = view_mut!(cx.editor);
-    let doc_id = view.doc;
+    let editor = &mut cx.editor;
 
-    if let Some((id, selection)) = view.jumps.forward(count) {
+    let later_views: Vec<ViewId> = editor
+        .tree
+        .traverse()
+        .skip_while(|&(id, _view)| id != editor.tree.focus)
+        .skip(1)
+        .map(|(id, _view)| id)
+        .collect();
+    log::warn!("jump_forward {:?} with {:?} later", count, later_views);
+    if count <= later_views.len() {
+        cx.editor.focus(later_views[count - 1]);
+        return;
+    }
+
+    let config = editor.config();
+    let view = view_mut!(editor);
+    let doc_id = view.doc;
+    if let Some((id, selection)) = view.jumps.forward(count - later_views.len()) {
         view.doc = *id;
         let selection = selection.clone();
         let (view, doc) = current!(cx.editor); // refetch doc
@@ -4713,6 +4727,22 @@ fn jump_forward(cx: &mut Context) {
 
 fn jump_backward(cx: &mut Context) {
     let count = cx.count();
+    let editor = &mut cx.editor;
+
+    let earlier_views: Vec<ViewId> = editor
+        .tree
+        .traverse()
+        .rev()
+        .skip_while(|&(id, _view)| id != editor.tree.focus)
+        .skip(1)
+        .map(|(id, _view)| id)
+        .collect();
+    log::warn!("jump_backward {:?} with {:?} later", count, earlier_views);
+    if count <= earlier_views.len() {
+        cx.editor.focus(earlier_views[count - 1]);
+        return;
+    }
+
     let config = cx.editor.config();
     let (view, doc) = current!(cx.editor);
     let doc_id = doc.id();
