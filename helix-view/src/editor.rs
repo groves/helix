@@ -19,6 +19,7 @@ use helix_lsp::Call;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use std::{
+    backtrace::Backtrace,
     borrow::Cow,
     cell::Cell,
     collections::{BTreeMap, HashMap},
@@ -1262,6 +1263,34 @@ impl Editor {
         align_view(doc, view, Align::Center);
     }
 
+    // Store a jump on the jumplist.
+    pub fn push_jump(&mut self) {
+        let later_views: Vec<ViewId> = self
+            .tree
+            .traverse()
+            .skip_while(|&(id, _view)| id != self.tree.focus)
+            .map(|(id, _view)| id)
+            .collect();
+        log::warn!("push_jump {:?} {:}", later_views, Backtrace::capture());
+        for idx in (1..later_views.len()).rev() {
+            let from_id = later_views[idx - 1];
+            let from_view = view!(self, from_id);
+            let offset = from_view.offset.clone();
+            let from_doc = doc_mut!(self, &from_view.doc);
+            let into_view = view_mut!(self, later_views[idx]);
+            log::warn!("from {:?} to {:?}", from_id, later_views[idx]);
+
+            into_view.doc = from_doc.id();
+            into_view.offset = offset;
+            from_doc.set_selection(into_view.id, from_doc.selection(from_id).clone());
+        }
+        if later_views.len() == 1 {
+            let (view, doc) = current!(self);
+
+            let jump = (doc.id(), doc.selection(view.id).clone());
+            view.jumps.push(jump);
+        }
+    }
     pub fn switch(&mut self, id: DocumentId, action: Action) {
         use crate::tree::Layout;
 
@@ -1289,11 +1318,8 @@ impl Editor {
                         .traverse()
                         .any(|(_, v)| v.doc == doc.id && v.id != view.id);
 
-                let (view, doc) = current!(self);
                 let view_id = view.id;
-
-                // Append any outstanding changes to history in the old document.
-                doc.append_changes_to_history(view);
+                let doc_id = doc.id;
 
                 if remove_empty_scratch {
                     // Copy `doc.id` into a variable before calling `self.documents.remove`, which requires a mutable
@@ -1306,11 +1332,13 @@ impl Editor {
                         view.remove_document(&id);
                     }
                 } else {
-                    let jump = (view.doc, doc.selection(view.id).clone());
-                    view.jumps.push(jump);
+                    self.push_jump();
                     // Set last accessed doc if it is a different document
-                    if doc.id != id {
-                        view.add_to_history(view.doc);
+                    if doc_id != id {
+                        let (view, doc) = current!(self);
+                        // Append any outstanding changes to history in the old document.
+                        doc.append_changes_to_history(view);
+                        // view.add_to_history(view.doc);
                         // Set last modified doc if modified and last modified doc is different
                         if std::mem::take(&mut doc.modified_since_accessed)
                             && view.last_modified_docs[0] != Some(view.doc)

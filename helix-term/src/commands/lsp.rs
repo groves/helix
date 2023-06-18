@@ -15,7 +15,7 @@ use tui::{
     widgets::Row,
 };
 
-use super::{align_view, push_jump, Align, Context, Editor, Open};
+use super::{align_view, Align, Context, Editor, Open};
 
 use helix_core::{
     path, syntax::LanguageServerFeature, text_annotations::InlineAnnotation, Selection,
@@ -202,8 +202,6 @@ fn jump_to_location(
     offset_encoding: OffsetEncoding,
     action: Action,
 ) {
-    push_jump(editor);
-
     let path = match location.uri.to_file_path() {
         Ok(path) => path,
         Err(_) => {
@@ -243,8 +241,6 @@ fn sym_picker(symbols: Vec<SymbolInformationItem>, current_path: Option<lsp::Url
         symbols,
         current_path.clone(),
         move |cx, item, action| {
-            push_jump(cx.editor);
-
             if current_path.as_ref() != Some(&item.symbol.location.uri) {
                 let uri = &item.symbol.location.uri;
                 let path = match uri.to_file_path() {
@@ -326,9 +322,7 @@ fn diag_picker(
                   offset_encoding,
               },
               action| {
-            if current_path.as_ref() == Some(url) {
-                push_jump(cx.editor);
-            } else {
+            if current_path.as_ref() != Some(url) {
                 let path = url.to_file_path().unwrap();
                 cx.editor.open(&path, action).expect("editor.open failed");
             }
