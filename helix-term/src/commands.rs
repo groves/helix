@@ -4673,7 +4673,11 @@ fn jump_forward(cx: &mut Context) {
         .skip(1)
         .map(|(id, _view)| id)
         .collect();
-    log::warn!("jump_forward {:?} with {:?} later", count, later_views);
+    log::warn!(
+        "jump_forward {:?} with {:?} later",
+        count,
+        later_views.len()
+    );
     if count <= later_views.len() {
         cx.editor.focus(later_views[count - 1]);
         return;
@@ -4681,6 +4685,7 @@ fn jump_forward(cx: &mut Context) {
 
     let config = editor.config();
     let view = view_mut!(editor);
+    log::warn!("jumps for forward {:?}", view.jumps.jumps);
     let doc_id = view.doc;
     if let Some((id, selection)) = view.jumps.forward(count - later_views.len()) {
         view.doc = *id;
@@ -4718,6 +4723,7 @@ fn jump_backward(cx: &mut Context) {
     let (view, doc) = current!(cx.editor);
     let doc_id = doc.id();
 
+    log::warn!("jumps for backward {:?}", view.jumps.jumps);
     if let Some((id, selection)) = view.jumps.backward(view.id, doc, count) {
         view.doc = *id;
         let selection = selection.clone();

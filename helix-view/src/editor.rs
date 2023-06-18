@@ -1288,6 +1288,7 @@ impl Editor {
             let (view, doc) = current!(self);
 
             let jump = (doc.id(), doc.selection(view.id).clone());
+            log::warn!("Pushing on {:?} to {:?}", view.id, doc);
             view.jumps.push(jump);
         }
     }

@@ -28,7 +28,7 @@ type Jump = (DocumentId, Selection);
 
 #[derive(Debug, Clone)]
 pub struct JumpList {
-    jumps: VecDeque<Jump>,
+    pub jumps: VecDeque<Jump>,
     current: usize,
 }
 
@@ -48,6 +48,7 @@ impl JumpList {
                 self.jumps.pop_front();
             }
 
+            log::warn!("PUSHING");
             self.jumps.push_back(jump);
             self.current = self.jumps.len();
         }
