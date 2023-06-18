@@ -2997,9 +2997,31 @@ fn normal_mode(cx: &mut Context) {
 
 // Store a jump on the jumplist.
 fn push_jump(editor: &mut Editor) {
-    let (view, doc) = current!(editor);
-    let jump = (doc.id(), doc.selection(view.id).clone());
-    view.jumps.push(jump);
+    let later_views: Vec<ViewId> = editor
+        .tree
+        .traverse()
+        .skip_while(|&(id, _view)| id != editor.tree.focus)
+        .map(|(id, _view)| id)
+        .collect();
+    log::warn!("push_jump {:?}", later_views);
+    for idx in (1..later_views.len()).rev() {
+        let from_id = later_views[idx - 1];
+        let from_view = view!(editor, from_id);
+        let offset = from_view.offset;
+        let from_doc = doc_mut!(editor, &from_view.doc);
+        let into_view = view_mut!(editor, later_views[idx]);
+        log::warn!("from {:?} to {:?}", from_id, later_views[idx]);
+
+        into_view.doc = from_doc.id();
+        into_view.offset = offset;
+        from_doc.set_selection(into_view.id, from_doc.selection(from_id).clone());
+    }
+    if later_views.len() == 1 {
+        let (view, doc) = current!(editor);
+
+        let jump = (doc.id(), doc.selection(view.id).clone());
+        view.jumps.push(jump);
+    }
 }
 
 fn goto_line(cx: &mut Context) {
