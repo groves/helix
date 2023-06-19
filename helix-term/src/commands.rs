@@ -4666,20 +4666,17 @@ fn jump_forward(cx: &mut Context) {
     let count = cx.count();
     let editor = &mut cx.editor;
 
-    let later_views: Vec<ViewId> = editor
+    let forward_views: Vec<ViewId> = editor
         .tree
         .traverse()
+        .rev()
         .skip_while(|&(id, _view)| id != editor.tree.focus)
         .skip(1)
         .map(|(id, _view)| id)
         .collect();
-    log::warn!(
-        "jump_forward {:?} with {:?} later",
-        count,
-        later_views.len()
-    );
-    if count <= later_views.len() {
-        cx.editor.focus(later_views[count - 1]);
+    log::warn!("jump_forward {:?} with {:?} forward", count, forward_views);
+    if count <= forward_views.len() {
+        cx.editor.focus(forward_views[count - 1]);
         return;
     }
 
@@ -4687,7 +4684,7 @@ fn jump_forward(cx: &mut Context) {
     let view = view_mut!(editor);
     log::warn!("jumps for forward {:?}", view.jumps.jumps);
     let doc_id = view.doc;
-    if let Some((id, selection)) = view.jumps.forward(count - later_views.len()) {
+    if let Some((id, selection)) = view.jumps.forward(count - forward_views.len()) {
         view.doc = *id;
         let selection = selection.clone();
         let (view, doc) = current!(cx.editor); // refetch doc
@@ -4705,17 +4702,20 @@ fn jump_backward(cx: &mut Context) {
     let count = cx.count();
     let editor = &mut cx.editor;
 
-    let earlier_views: Vec<ViewId> = editor
+    let backward_views: Vec<ViewId> = editor
         .tree
         .traverse()
-        .rev()
         .skip_while(|&(id, _view)| id != editor.tree.focus)
         .skip(1)
         .map(|(id, _view)| id)
         .collect();
-    log::warn!("jump_backward {:?} with {:?} later", count, earlier_views);
-    if count <= earlier_views.len() {
-        cx.editor.focus(earlier_views[count - 1]);
+    log::warn!(
+        "jump_backward {:?} with {:?} backward",
+        count,
+        backward_views.len()
+    );
+    if count <= backward_views.len() {
+        cx.editor.focus(backward_views[count - 1]);
         return;
     }
 
@@ -4724,7 +4724,10 @@ fn jump_backward(cx: &mut Context) {
     let doc_id = doc.id();
 
     log::warn!("jumps for backward {:?}", view.jumps.jumps);
-    if let Some((id, selection)) = view.jumps.backward(view.id, doc, count) {
+    if let Some((id, selection)) = view
+        .jumps
+        .backward(view.id, doc, count - backward_views.len())
+    {
         view.doc = *id;
         let selection = selection.clone();
         let (view, doc) = current!(cx.editor); // refetch doc
