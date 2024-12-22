@@ -4425,10 +4425,10 @@ fn paste_impl(
             .unwrap(),
     );
 
-    // if any of values ends with a line ending, it's linewise paste
-    let linewise = values
-        .iter()
-        .any(|value| get_line_ending_of_str(value).is_some());
+    // Helix normally checks if any of values ends with a line ending
+    // If so, it treats the paste "linewise"
+    // I don't like linewise behavior, so I turn it off brutally
+    let linewise = false;
 
     // Only compiled once.
     static REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\r\n|\r|\n").unwrap());
