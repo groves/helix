@@ -30,7 +30,7 @@ use helix_core::{
     history::UndoKind,
     increment,
     indent::{self, IndentStyle},
-    line_ending::{get_line_ending_of_str, line_end_char_index},
+    line_ending::{line_end_char_index},
     match_brackets,
     movement::{self, move_vertically_visual, Direction},
     object, pos_at_coords,
@@ -4923,10 +4923,10 @@ fn paste_impl(
         doc.append_changes_to_history(view);
     }
 
-    // if any of values ends with a line ending, it's linewise paste
-    let linewise = values
-        .iter()
-        .any(|value| get_line_ending_of_str(value).is_some());
+    // Helix normally checks if any of values ends with a line ending
+    // If so, it treats the paste "linewise"
+    // I don't like linewise behavior, so I turn it off brutally
+    let linewise = false;
 
     let map_value = |value| {
         let value = LINE_ENDING_REGEX.replace_all(value, doc.line_ending.as_str());
