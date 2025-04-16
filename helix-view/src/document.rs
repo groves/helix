@@ -1269,6 +1269,20 @@ impl Document {
         };
     }
 
+    /// Check if the file has been modified on disk since the last time it was saved or loaded
+    pub fn is_modified_on_disk(&self) -> bool {
+        match self.path() {
+            Some(path) => match path.metadata() {
+                Ok(metadata) => match metadata.modified() {
+                    Ok(mtime) => mtime > self.last_saved_time,
+                    Err(_) => false,
+                },
+                Err(_) => false,
+            },
+            None => false,
+        }
+    }
+
     // Detect if the file is readonly and change the readonly field if necessary (unix only)
     pub fn detect_readonly(&mut self) {
         // Allows setting the flag for files the user cannot modify, like root files
