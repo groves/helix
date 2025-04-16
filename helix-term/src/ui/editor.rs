@@ -1595,6 +1595,8 @@ impl Component for EditorView {
             Event::IdleTimeout => self.handle_idle_timeout(&mut cx),
             Event::FocusGained => {
                 self.terminal_focused = true;
+                // Reload external file changes on focus gained.
+                context.editor.check_for_external_file_changes();
                 EventResult::Consumed(None)
             }
             Event::FocusLost => {

@@ -2635,6 +2635,58 @@ impl Editor {
         doc.set_selection(view_id, selection);
         view.ensure_cursor_in_view_center(doc, self.config.load().scrolloff);
     }
+
+    /// Check all open documents for modifications on disk and reload them if needed
+    pub fn check_for_external_file_changes(&mut self) {
+        let modified_docs: Vec<(DocumentId, PathBuf)> = self
+            .documents()
+            .filter_map(|doc| {
+                if doc.is_modified_on_disk() {
+                    doc.path().map(|path| (doc.id(), path.to_path_buf()))
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        for (doc_id, path) in modified_docs {
+            // Reload the document
+            if let Err(e) = self.reload_document(doc_id) {
+                self.set_error(format!("Failed to reload {}: {}", path.display(), e));
+            } else {
+                self.set_status(format!("Reloaded file from disk: {}", path.display()));
+            }
+        }
+    }
+
+    /// Reload a specific document from disk
+    pub fn reload_document(&mut self, doc_id: DocumentId) -> Result<(), anyhow::Error> {
+        let view_id = self.get_synced_view_id(doc_id);
+
+        // Get a reference to diff_providers before borrowing other parts of self
+        let diff_providers = self.diff_providers.clone();
+
+        // Check if document exists first
+        if !self.documents.contains_key(&doc_id) {
+            return Err(anyhow!("Document not found"));
+        }
+
+        // Per-document trust, as in `:reload-all`: each doc's workspace may differ, and
+        // gix only gets full trust where the workspace was granted it. Read it before
+        // taking the mutable borrow below.
+        let trust_full = self
+            .workspace_trust
+            .query(self.documents[&doc_id].workspace_root(), TrustQuery::Git)
+            .is_trusted();
+
+        // Get a raw pointer to the document first, then get the view.
+        let doc_ptr: &mut Document = self.documents.get_mut(&doc_id).unwrap();
+
+        // Get the view and use the raw pointer to avoid overlapping borrows
+        let view = self.tree.get_mut(view_id);
+
+        doc_ptr.reload(view, &diff_providers, trust_full)
+    }
 }
 
 fn try_restore_indent(doc: &mut Document, view: &mut View) {
