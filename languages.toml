@@ -987,9 +987,9 @@ scope = "source.go-format-string"
 file-types = []
 injection-regex = "go-format-string"
 
-[[grammar]]
-name = "go-format-string"
-source = { git = "https://codeberg.org/kpbaks/tree-sitter-go-format-string", rev = "06587ea641155db638f46a32c959d68796cd36bb" }
+# [[grammar]]
+# name = "go-format-string"
+# source = { git = "https://codeberg.org/kpbaks/tree-sitter-go-format-string", rev = "06587ea641155db638f46a32c959d68796cd36bb" }
 
 [[language]]
 name = "javascript"
@@ -1645,9 +1645,9 @@ scope = "source.lua-format-string"
 file-types = []
 injection-regex = "lua-format-string"
 
-[[grammar]]
-name = "lua-format-string"
-source = { git = "https://codeberg.org/kpbaks/tree-sitter-lua-format-string", rev = "b667c8cab109df307e1b4d56b0b43f5c4a353533" }
+# [[grammar]]
+# name = "lua-format-string"
+# source = { git = "https://codeberg.org/kpbaks/tree-sitter-lua-format-string", rev = "b667c8cab109df307e1b4d56b0b43f5c4a353533" }
 
 [[grammar]]
 name = "teal"
@@ -1853,9 +1853,9 @@ comment-token = "%"
 block-comment-tokens = { start = "/*", end = "*/" }
 language-servers = [ "swipl" ]
 
-[[grammar]]
-name = "prolog"
-source = { git = "https://codeberg.org/foxy/tree-sitter-prolog", subpath = "grammars/prolog", rev = "d8d415f6a1cf80ca138524bcc395810b176d40fa" }
+# [[grammar]]
+# name = "prolog"
+# source = { git = "https://codeberg.org/foxy/tree-sitter-prolog", subpath = "grammars/prolog", rev = "d8d415f6a1cf80ca138524bcc395810b176d40fa" }
 
 [[language]]
 name = "tsq"
@@ -2098,9 +2098,9 @@ scope = "text.mail"
 file-types = ["eml"]
 injection-regex = "mail|eml|email"
 
-[[grammar]]
-name = "mail"
-source = { git = "https://codeberg.org/ficd/tree-sitter-mail", rev = "5eddbfdbec4c893182c79047499901c196332e78" }
+# [[grammar]]
+# name = "mail"
+# source = { git = "https://codeberg.org/ficd/tree-sitter-mail", rev = "5eddbfdbec4c893182c79047499901c196332e78" }
 
 [[language]]
 name = "markdown"
@@ -4728,9 +4728,9 @@ indent = { tab-width = 4, unit = "    " }
 '"' = '"'
 '<' = '>'
 
-[[grammar]]
-name = "spade"
-source = { git = "https://codeberg.org/spade-lang/tree-sitter-spade", rev = "4eb2fc0173e48564421721f8e4f25a0fde89ac70" }
+# [[grammar]]
+# name = "spade"
+# source = { git = "https://codeberg.org/spade-lang/tree-sitter-spade", rev = "4eb2fc0173e48564421721f8e4f25a0fde89ac70" }
 
 [[language]]
 name = "amber"
@@ -5185,9 +5185,9 @@ injection-regex = "shellcheck(rc)?"
 file-types = [{glob = "shellcheckrc"}, {glob = ".shellcheckrc"}]
 comment-token = "#"
 
-[[grammar]]
-name = "shellcheckrc"
-source = {git = "https://codeberg.org/kpbaks/tree-sitter-shellcheckrc", rev = "ad3da4e8f7fd72dcc5e93a6b89822c59a7cd10ff"}
+# [[grammar]]
+# name = "shellcheckrc"
+# source = {git = "https://codeberg.org/kpbaks/tree-sitter-shellcheckrc", rev = "ad3da4e8f7fd72dcc5e93a6b89822c59a7cd10ff"}
 
 [[grammar]]
 name = "strictdoc"
@@ -5468,9 +5468,9 @@ comment-token = "#"
 '"' = '"'
 "'" = "'"
 
-[[grammar]]
-name = "gnuplot"
-source = { git = "https://codeberg.org/maribu/tree-sitter-gnuplot", rev = "21a3a3929facb964b3592daeb69119294ff84cf2" }
+# [[grammar]]
+# name = "gnuplot"
+# source = { git = "https://codeberg.org/maribu/tree-sitter-gnuplot", rev = "21a3a3929facb964b3592daeb69119294ff84cf2" }
 
 [[language]]
 name = "ebnf"
@@ -5511,9 +5511,9 @@ block-comment-tokens = { start = "(*", end = "*)" }
 '"' = '"'
 "'" = "'"
 
-[[grammar]]
-name = "proverif"
-source = { git = "https://codeberg.org/maribu/tree-sitter-proverif", rev = "7741807092c4009c1fe4c3648da60ca72b1b80f1" }
+# [[grammar]]
+# name = "proverif"
+# source = { git = "https://codeberg.org/maribu/tree-sitter-proverif", rev = "7741807092c4009c1fe4c3648da60ca72b1b80f1" }
 
 [[language]]
 name = "ptx"
@@ -5525,9 +5525,9 @@ comment-token = "//"
 block-comment-tokens = { start = "/*", end = "*/" }
 indent = { tab-width = 4, unit = "    " }
 
-[[grammar]]
-name = "ptx"
-source = { git = "https://codeberg.org/jer-gremlin/tree-sitter-ptx", rev = "3dfa6758d4c15832d051f933101992b9e01d6611" }
+# [[grammar]]
+# name = "ptx"
+# source = { git = "https://codeberg.org/jer-gremlin/tree-sitter-ptx", rev = "3dfa6758d4c15832d051f933101992b9e01d6611" }
 
 [[language]]
 name = "tql"
