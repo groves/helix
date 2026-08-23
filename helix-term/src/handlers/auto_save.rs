@@ -81,21 +81,37 @@ impl helix_event::AsyncHook for AutoSaveHandler {
 }
 
 fn request_auto_save(editor: &mut Editor) {
+    let mut jobs = Jobs::new();
     let context = &mut compositor::Context {
         editor,
         scroll: Some(0),
-        jobs: &mut Jobs::new(),
+        jobs: &mut jobs,
     };
 
     let options = commands::WriteAllOptions {
         force: false,
         write_scratch: false,
         auto_format: false,
-        code_actions: false,
+        code_actions: true,
     };
 
     if let Err(e) = commands::typed::write_all_impl(context, options) {
         context.editor.set_error(format!("{}", e));
+    }
+
+    // With code actions on save the write is deferred into a job chain instead of
+    // happening synchronously. The `Jobs` above is local to this handler and never
+    // polled, so hand those futures to the runtime directly: their callbacks come
+    // back through the global job queue and get run by the main loop, which owns the
+    // real `Jobs` and picks up the rest of the chain.
+    for future in std::mem::take(&mut jobs.wait_futures) {
+        tokio::spawn(async move {
+            match future.await {
+                Result::Ok(Some(callback)) => job::dispatch_callback(callback).await,
+                Result::Ok(None) => (),
+                Err(err) => helix_event::status::report(err).await,
+            }
+        });
     }
 }
 
